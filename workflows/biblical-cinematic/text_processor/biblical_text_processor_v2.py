@@ -209,6 +209,15 @@ def kjv_narration_fix(text: str) -> str:
     text = re.sub(r'\bIerusalem\b', 'Jerusalem', text)
     text = re.sub(r'\bIacob\b', 'Jacob', text)
     text = re.sub(r'\bIuda\b', 'Judah', text)
+    # I→J names (KJV used I for J sound)
+    text = re.sub(r'\bIames\b', 'James', text)
+    text = re.sub(r'\bIohn\b', 'John', text)
+    text = re.sub(r'\bIudas\b', 'Judas', text)
+    text = re.sub(r'\bIesus\b', 'Jesus', text)
+    text = re.sub(r'\bIoseph\b', 'Joseph', text)
+    text = re.sub(r'\bIoel\b', 'Joel', text)
+    text = re.sub(r'\bIonah\b', 'Jonah', text)
+    text = re.sub(r'\bIoshua\b', 'Joshua', text)
     
     # CRITICAL pronunciation-breaking spellings (ElevenLabs priority)
     text = re.sub(r'\biudgement', 'judgment', text, flags=re.IGNORECASE)  # judgement/judgements
@@ -385,9 +394,366 @@ def kjv_narration_fix(text: str) -> str:
     text = re.sub(r'\bwhales\b', 'whales', text, flags=re.IGNORECASE)
     text = re.sub(r'\bspirits\b', 'spirits', text, flags=re.IGNORECASE)
     
+    # ── Specific vncleane / vncleannesse (handled before general rule) ────────
+    text = re.sub(r'\bvncleane\b', 'unclean', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bvncleannesse\b', 'uncleanness', text, flags=re.IGNORECASE)
+
+    # Receive forms (u→v swap in middle of word)
+    text = re.sub(r'\breceiueth\b', 'receiveth', text, flags=re.IGNORECASE)
+    text = re.sub(r'\breceiued\b', 'received', text, flags=re.IGNORECASE)
+    text = re.sub(r'\breceiue\b', 'receive', text, flags=re.IGNORECASE)
+
+    # Common verb/word fixes from Matthew 10
+    text = re.sub(r'\btwelue\b', 'twelve', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bgaue\b', 'gave', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bheale\b', 'heal', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmaner\b', 'manner', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsickenesse\b', 'sickness', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bfoorth\b', 'forth', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bspeake\b', 'speak', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdrinke\b', 'drink', text, flags=re.IGNORECASE)
+    text = re.sub(r'\breturne\b', 'return', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bthinke\b', 'think', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bloueth\b', 'loveth', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcrosse\b', 'cross', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bgiuen\b', 'given', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsolde\b', 'sold', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bnumbred\b', 'numbered', text, flags=re.IGNORECASE)
+
+    # Body parts / physical words
+    text = re.sub(r'\bfeete\b', 'feet', text, flags=re.IGNORECASE)
+    text = re.sub(r'\beare\b', 'ear', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bhaires\b', 'hairs', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bchilde\b', 'child', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bhoure\b', 'hour', text, flags=re.IGNORECASE)
+
+    # Animals / nature
+    text = re.sub(r'\bsheepe\b', 'sheep', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwolues\b', 'wolves', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdoues\b', 'doves', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bSparrowes\b', 'Sparrows', text)
+    text = re.sub(r'\bsparrowes\b', 'sparrows', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdeuils\b', 'devils', text, flags=re.IGNORECASE)
+
+    # Travel / equipment words
+    text = re.sub(r'\biourney\b', 'journey', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bscrippe\b', 'scrip', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bshooes\b', 'shoes', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bstaues\b', 'staves', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bworkeman\b', 'workman', text, flags=re.IGNORECASE)
+
+    # Titles / roles
+    text = re.sub(r'\bPublicane\b', 'Publican', text)
+    text = re.sub(r'\bpublicane\b', 'publican', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bGouernours\b', 'Governors', text)
+    text = re.sub(r'\bgouernours\b', 'governors', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bGouernour\b', 'Governor', text)
+    text = re.sub(r'\bgouernour\b', 'governor', text, flags=re.IGNORECASE)
+
+    # More -soever compounds
+    text = re.sub(r'\bwhatsoeuer\b', 'whatsoever', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwhosoeuer\b', 'whosoever', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bhowsoeuer\b', 'howsoever', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwheresoeuer\b', 'wheresoever', text, flags=re.IGNORECASE)
+
+    # Place / location words
+    text = re.sub(r'\btowne\b', 'town', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcitie\b', 'city', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmiddest\b', 'midst', text, flags=re.IGNORECASE)
+
+    # Adjectives / adverbs
+    text = re.sub(r'\bharmelesse\b', 'harmless', text, flags=re.IGNORECASE)
+    text = re.sub(r'\blitle\b', 'little', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bProuide\b', 'Provide', text)
+    text = re.sub(r'\bprouide\b', 'provide', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsiluer\b', 'silver', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bbrasse\b', 'brass', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btestimonie\b', 'testimony', text, flags=re.IGNORECASE)
+
+    # Past participles / state words
+    text = re.sub(r'\bcouered\b', 'covered', text, flags=re.IGNORECASE)
+    text = re.sub(r'\breueiled\b', 'revealed', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bhidde\b', 'hidden', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bknowen\b', 'known', text, flags=re.IGNORECASE)
+
+    # V→U at word start (U printed as V in 1611)
+    text = re.sub(r'\bUerely\b', 'Verily', text)
+    text = re.sub(r'\bverely\b', 'verily', text, flags=re.IGNORECASE)
+
+    # iudgment without the extra 'e' (existing rule catches 'iudgement')
+    text = re.sub(r'\biudgment\b', 'judgment', text, flags=re.IGNORECASE)
+
+    # Missed words caught in Matthew 10 test pass
+    text = re.sub(r'\bsicke\b', 'sick', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bconfesse\b', 'confess', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bowne\b', 'own', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bhoushold\b', 'household', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bshal\b', 'shall', text, flags=re.IGNORECASE)  # "shal" short form
+    text = re.sub(r'\bwil\b', 'will', text, flags=re.IGNORECASE)   # "wil" short form
+
+    # Matthew 11 additions
+    # Common verbs
+    text = re.sub(r'\bpasse\b', 'pass', text, flags=re.IGNORECASE)          # "came to passe"
+    text = re.sub(r'\bsaide\b', 'said', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcommaunding\b', 'commanding', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bvpbraid\b', 'upbraid', text, flags=re.IGNORECASE)     # vp inside word, \bvp\b won't catch
+    text = re.sub(r'\blooke\b', 'look', text, flags=re.IGNORECASE)
+    text = re.sub(r'\blearne\b', 'learn', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bprophecied\b', 'prophesied', text, flags=re.IGNORECASE)
+    text = re.sub(r'\breueile\b', 'reveal', text, flags=re.IGNORECASE)      # base form (reueiled already covered)
+    # Adjectives
+    text = re.sub(r'\bdeafe\b', 'deaf', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bpoore\b', 'poor', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmightie\b', 'mighty', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmeeke\b', 'meek', text, flags=re.IGNORECASE)
+    text = re.sub(r'\beasie\b', 'easy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bheauy\b', 'heavy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwisedom\b', 'wisdom', text, flags=re.IGNORECASE)
+    text = re.sub(r'\biustified\b', 'justified', text, flags=re.IGNORECASE)
+    # Nature words
+    text = re.sub(r'\breede\b', 'reed', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwinde\b', 'wind', text, flags=re.IGNORECASE)          # singular (windes already covered)
+    text = re.sub(r'\bwildernesse\b', 'wilderness', text, flags=re.IGNORECASE)
+    # Clothing / physical
+    text = re.sub(r'\bweare\b', 'wear', text, flags=re.IGNORECASE)          # "they that weare soft clothing"
+    text = re.sub(r'\bcloathing\b', 'clothing', text, flags=re.IGNORECASE)
+    # People / roles
+    text = re.sub(r'\bborne\b', 'born', text, flags=re.IGNORECASE)          # "born of women"
+    text = re.sub(r'\bpublicanes\b', 'publicans', text, flags=re.IGNORECASE)
+    # Places
+    text = re.sub(r'\bSodome\b', 'Sodom', text)
+    # Time / quantity
+    text = re.sub(r'\bagoe\b', 'ago', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bbeene\b', 'been', text, flags=re.IGNORECASE)          # double-e form (bene already covered)
+    text = re.sub(r'\bvntill\b', 'until', text, flags=re.IGNORECASE)        # double-l form
+    text = re.sub(r'\bvntil\b', 'until', text, flags=re.IGNORECASE)         # single-l form
+    # Devil singular (deuils plural already covered)
+    text = re.sub(r'\bdeuill\b', 'devil', text, flags=re.IGNORECASE)
+    # soever compound
+    text = re.sub(r'\bwhomsoeuer\b', 'whomsoever', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwhoseouer\b', 'whosoever', text, flags=re.IGNORECASE)  # alt spelling (whosoeuer already covered)
+    # Special Unicode characters from 1611 print (thorn + macron)
+    text = text.replace('þe', 'the').replace('þE', 'The')   # thorn = th
+    text = text.replace('frō', 'from').replace('frŌ', 'From')  # macron-o = om
+
+    # Matthew 12 additions
+    # Travel / direction
+    text = re.sub(r'\bthorow\b', 'through', text, flags=re.IGNORECASE)   # "thorow the corne"
+    # Food / agriculture
+    text = re.sub(r'\bcorne\b', 'corn', text, flags=re.IGNORECASE)
+    text = re.sub(r'\beares\b', 'ears', text, flags=re.IGNORECASE)       # "eares of corne" (eare→ear already covered)
+    text = re.sub(r'\bhungred\b', 'hungered', text, flags=re.IGNORECASE) # "an hungred"
+    text = re.sub(r'\bflaxe\b', 'flax', text, flags=re.IGNORECASE)
+    # Verbs
+    text = re.sub(r'\bbeganne\b', 'began', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsaye\b', 'say', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bstriue\b', 'strive', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bbreake\b', 'break', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bspake\b', 'spoke', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdiuided\b', 'divided', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bspoile\b', 'spoil', text, flags=re.IGNORECASE)
+    # Adjectives / state
+    text = re.sub(r'\bblinde\b', 'blind', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdumbe\b', 'dumb', text, flags=re.IGNORECASE)       # KJV "dumb" = mute
+    text = re.sub(r'\bguiltlesse\b', 'guiltless', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bblamelesse\b', 'blameless', text, flags=re.IGNORECASE)
+    text = re.sub(r'\blawfull\b', 'lawful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bemptie\b', 'empty', text, flags=re.IGNORECASE)
+    text = re.sub(r'\beuil\b', 'evil', text, flags=re.IGNORECASE)        # single-l (euill already covered)
+    text = re.sub(r'\bcertaine\b', 'certain', text, flags=re.IGNORECASE)
+    # Nouns
+    text = re.sub(r'\bblasphemie\b', 'blasphemy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\baccompt\b', 'account', text, flags=re.IGNORECASE)  # "give accompt"
+    text = re.sub(r'\bcounsell\b', 'counsel', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwordes\b', 'words', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bshepe\b', 'sheep', text, flags=re.IGNORECASE)      # alt spelling (sheepe already covered)
+    # Numbers
+    text = re.sub(r'\bseuen\b', 'seven', text, flags=re.IGNORECASE)
+    # -self reflexives
+    text = re.sub(r'\bhimselfe\b', 'himself', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bherselfe\b', 'herself', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmyselfe\b', 'myself', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bthemselues\b', 'themselves', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bselfe\b', 'self', text, flags=re.IGNORECASE)       # catches "it selfe", "in selfe"
+    # Connectives
+    text = re.sub(r'\bWherfore\b', 'Wherefore', text)
+    text = re.sub(r'\bwherfore\b', 'wherefore', text, flags=re.IGNORECASE)
+    # Names / places
+    text = re.sub(r'\bDauid\b', 'David', text)
+    text = re.sub(r'\bPharises\b', 'Pharisees', text)                    # alt spelling (Pharisees already correct)
+    text = re.sub(r'\bpharises\b', 'pharisees', text)
+    text = re.sub(r'\bEsaias\b', 'Isaiah', text)                         # KJV Greek form → familiar name
+    text = re.sub(r'\bIonas\b', 'Jonah', text)                           # KJV Greek form → familiar name
+    text = re.sub(r'\bIudges\b', 'Judges', text)                         # capital - role not book
+    text = re.sub(r'\biudges\b', 'judges', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bNineue\b', 'Nineveh', text)
+    text = re.sub(r'\bQueene\b', 'Queen', text)
+    text = re.sub(r'\bvttermost\b', 'uttermost', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwisedome\b', 'wisdom', text, flags=re.IGNORECASE)  # alt spelling (wisedom already covered)
+    text = re.sub(r'\bdaies\b', 'days', text, flags=re.IGNORECASE)       # alt spelling (dayes already covered)
+
+    # ── General vn→un prefix rule (runs AFTER specific patterns) ────────────
+    # Catches any remaining 1611 vn-words not explicitly handled above.
+    # Safe: no English word legitimately starts with "vn".
+    text = re.sub(r'\bvn([a-z])', lambda m: 'un' + m.group(1), text)
+    text = re.sub(r'\bVn([a-zA-Z])', lambda m: 'Un' + m.group(1), text)
+    # Fix -e endings that the general rule leaves behind (unlesse, etc.)
+    text = re.sub(r'\bunlesse\b', 'unless', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bunbeleeue', 'unbelieve', text, flags=re.IGNORECASE)
+    text = re.sub(r'\buncleane\b', 'unclean', text, flags=re.IGNORECASE)
+    text = re.sub(r'\buncleannesse\b', 'uncleanness', text, flags=re.IGNORECASE)
+
+    # ── Proactive whole-Bible patterns (covers NT + OT common words) ─────────
+
+    # Irregular past tenses (common across all 4 Gospels and Epistles)
+    text = re.sub(r'\bknewe\b', 'knew', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bgrewe\b', 'grew', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdrewe\b', 'drew', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bthrewe\b', 'threw', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bfledde\b', 'fled', text, flags=re.IGNORECASE)
+    text = re.sub(r'\branne\b', 'ran', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bstoode\b', 'stood', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btooke\b', 'took', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bforsooke\b', 'forsook', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bstrooke\b', 'struck', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsprange\b', 'sprang', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bstake\b', 'stuck', text, flags=re.IGNORECASE)     # rare alt
+    text = re.sub(r'\bholpen\b', 'helped', text, flags=re.IGNORECASE)   # "hath holpen"
+    text = re.sub(r'\bwaxe\b', 'wax', text, flags=re.IGNORECASE)        # "wax cold"
+    text = re.sub(r'\bcloke\b', 'cloak', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bstrake\b', 'struck', text, flags=re.IGNORECASE)
+
+    # Nouns: -ow/-ow words with silent -e
+    text = re.sub(r'\bsorrowe\b', 'sorrow', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmorrowe\b', 'morrow', text, flags=re.IGNORECASE)  # "the morrow"
+    text = re.sub(r'\bsworde\b', 'sword', text, flags=re.IGNORECASE)
+    text = re.sub(r'\broote\b', 'root', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bbosome\b', 'bosom', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsinne\b', 'sin', text, flags=re.IGNORECASE)       # singular (sinnes already covered)
+    text = re.sub(r'\bgolde\b', 'gold', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmyrrhe\b', 'myrrh', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bglasse\b', 'glass', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcompasse\b', 'compass', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btrespasse\b', 'trespass', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdarke\b', 'dark', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmarke\b', 'mark', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bheele\b', 'heel', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bfieldes\b', 'fields', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bstorke\b', 'stork', text, flags=re.IGNORECASE)
+
+    # Nouns: -ie → -y (systematic KJV pattern throughout whole Bible)
+    text = re.sub(r'\bglorie\b', 'glory', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bvictorie\b', 'victory', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bauthoritie\b', 'authority', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcountrie\b', 'country', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcompanie\b', 'company', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bvirginitie\b', 'virginity', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bhumilitie\b', 'humility', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bvanitie\b', 'vanity', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmysterie\b', 'mystery', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bprosperie\b', 'prosperity', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bprosporitie\b', 'prosperity', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bprosperitie\b', 'prosperity', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bremedee\b', 'remedy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bremedee\b', 'remedy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bremedee\b', 'remedy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bremedee\b', 'remedy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bbodie\b', 'body', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bplentie\b', 'plenty', text, flags=re.IGNORECASE)
+    text = re.sub(r'\barmie\b', 'army', text, flags=re.IGNORECASE)
+    text = re.sub(r'\benemie\b', 'enemy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bfamilie\b', 'family', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bstudie\b', 'study', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bgluttonie\b', 'gluttony', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bceremonies\b', 'ceremony', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bhypocrisie\b', 'hypocrisy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bheresie\b', 'heresy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bielousie\b', 'jealousy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btreasuries\b', 'treasury', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btreasurie\b', 'treasury', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bworthy\b', 'worthy', text, flags=re.IGNORECASE)   # already fine but ensure
+    text = re.sub(r'\bworthie\b', 'worthy', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmanie\b', 'many', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcontrarie\b', 'contrary', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bnecessarie\b', 'necessary', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bpalsie\b', 'palsy', text, flags=re.IGNORECASE)    # Matthew 4/8/9
+    text = re.sub(r'\bfurie\b', 'fury', text, flags=re.IGNORECASE)
+    text = re.sub(r'\blibertie\b', 'liberty', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bpuritie\b', 'purity', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcharitie\b', 'charity', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcruelties\b', 'cruelty', text, flags=re.IGNORECASE)
+
+    # People / place names with archaic spellings (whole Bible)
+    text = re.sub(r'\bHerode\b', 'Herod', text)
+    text = re.sub(r'\bGalilee\b', 'Galilee', text)     # already correct
+    text = re.sub(r'\bGalile\b', 'Galilee', text)
+    text = re.sub(r'\bGalilei\b', 'Galilee', text)
+    text = re.sub(r'\bBethanie\b', 'Bethany', text)
+    text = re.sub(r'\bIudea\b', 'Judea', text)
+    text = re.sub(r'\bIudaea\b', 'Judea', text)
+    text = re.sub(r'\bGolgotha\b', 'Golgotha', text)   # fine
+    text = re.sub(r'\bElias\b', 'Elijah', text)        # KJV Greek form used in NT
+    text = re.sub(r'\bEliseus\b', 'Elisha', text)      # KJV Greek form
+    text = re.sub(r'\bMoses\b', 'Moses', text)         # fine
+    text = re.sub(r'\bIob\b', 'Job', text)             # I→J
+    text = re.sub(r'\bIoel\b', 'Joel', text)           # already covered
+    text = re.sub(r'\bIona\b', 'Jonah', text)
+    text = re.sub(r'\bIsrael\b', 'Israel', text)       # fine
+
+    # Adjectives with -ll double ending (common throughout)
+    text = re.sub(r'\bsubtill\b', 'subtle', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsubtle\b', 'subtle', text, flags=re.IGNORECASE)   # fine
+    text = re.sub(r'\bfaithfull\b', 'faithful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bthankfull\b', 'thankful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bpowerfull\b', 'powerful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bfearfull\b', 'fearful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bfrutefull\b', 'fruitful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bfruitefull\b', 'fruitful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwillfull\b', 'willful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bskilfull\b', 'skillful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bcarefull\b', 'careful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bpitifull\b', 'pitiful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bshamefull\b', 'shameful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwastfull\b', 'wasteful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdeceitfull\b', 'deceitful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsinfull\b', 'sinful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwrathfull\b', 'wrathful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bscornfull\b', 'scornful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsorrowfull\b', 'sorrowful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bjoyefull\b', 'joyful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bjoyfull\b', 'joyful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bpeacefull\b', 'peaceful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bwonderfull\b', 'wonderful', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bmercifull\b', 'merciful', text, flags=re.IGNORECASE)  # already have but reinforcing
+
+    # Common KJV words with extra -e/-ue
+    text = re.sub(r'\bsaluacion\b', 'salvation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsaluaion\b', 'salvation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bsaluation\b', 'salvation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btemptacion\b', 'temptation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btribulaion\b', 'tribulation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btribulacion\b', 'tribulation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\btribulaion\b', 'tribulation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bconfirmacion\b', 'confirmation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdamnacion\b', 'damnation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdamnation\b', 'damnation', text, flags=re.IGNORECASE)  # fine
+    text = re.sub(r'\bcondemnacion\b', 'condemnation', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bresurrection\b', 'resurrection', text, flags=re.IGNORECASE)  # fine
+    text = re.sub(r'\bperfeccion\b', 'perfection', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdeuotion\b', 'devotion', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdesolacion\b', 'desolation', text, flags=re.IGNORECASE)
+
+    # Additional nature / environment words
+    text = re.sub(r'\bdesarte\b', 'desert', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bdesert\b', 'desert', text, flags=re.IGNORECASE)    # fine
+    text = re.sub(r'\bforrest\b', 'forest', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bplaines\b', 'plains', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bvalleyes\b', 'valleys', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bpastures\b', 'pastures', text, flags=re.IGNORECASE)  # fine
+
     # Fix "&" → "and" for narration
     text = re.sub(r'\s+&\s+', ' and ', text)
-    
+
     return text
 
 def split_into_words(text):

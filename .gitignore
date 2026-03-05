@@ -1,6 +1,9 @@
 # Environment
 .env
 
+# Claude Code local settings
+.claude/
+
 # Generated output
 output/
 !output/.gitkeep

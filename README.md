@@ -157,9 +157,14 @@ pip install -r requirements.txt
 
 #### Step 1 — Start the server
 
+**Option A — Double-click (fastest):**
+Double-click `start.bat` at the project root. A terminal opens, the server starts, and the window stays open.
+
+**Option B — Terminal:**
 ```bash
 cd workflows/biblical-cinematic/server
 python app.py
+# or: npm start
 ```
 
 You'll see:
@@ -331,6 +336,7 @@ python pipeline.py path/to/script.txt   # CLI mode
 AI Movie/
 ├── README.md                               ← you are here
 ├── CLAUDE.md                               ← AI assistant context file
+├── start.bat                               ← double-click to start Biblical server
 ├── .env.example                            ← copy to .env, fill in keys
 ├── app.py                                  ← General pipeline — Gradio UI
 ├── pipeline.py                             ← General pipeline — orchestrator
@@ -348,7 +354,8 @@ AI Movie/
 │       ├── README.md                       ← detailed biblical workflow docs
 │       ├── server/
 │       │   ├── app.py                      ← FastAPI web server (run this)
-│       │   └── requirements.txt
+│       │   ├── requirements.txt
+│       │   └── package.json                ← enables: npm start
 │       ├── text_processor/
 │       │   └── biblical_text_processor_v2.py  ← KJV text cleaner
 │       ├── n8n/
