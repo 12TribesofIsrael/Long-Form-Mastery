@@ -111,18 +111,19 @@ Scripture text (copy from Bible)
 │    Time: ~2 min (FFmpeg)
 │
 ▼
-9. ◯ PLANNED — Auto-upload to YouTube
-│    Script reads final MP4 + auto-generates:
-│    → Title from scripture reference (e.g. "Matthew 8 | KJV")
-│    → Description from scene list or template
-│    → Tags (biblical, KJV, etc.)
-│    → Thumbnail (auto or from template)
-│    Publishes or schedules via YouTube Data API v3
+9. ✓ AUTO — Run upload_youtube.py (uploads as unlisted draft)
+│    python workflows/biblical-cinematic/scripts/upload_youtube.py output/video_final.mp4 "Genesis 1"
+│    → Authenticates via OAuth2 (browser on first run, token reused after)
+│    → Auto-generates title: "Genesis 1 | KJV Bible | AI Cinematic"
+│    → Auto-generates description + tags
+│    → Generates thumbnail (dark background + gold scripture text via Pillow)
+│    → Uploads to YouTube as unlisted
+│    → Prints video URL + Studio edit link
 │
 ▼
 Published ✓
 
-Total hands-on time: ~5–10 min per video (just paste, review, click, pick music)
+Total hands-on time: ~3–5 min per video (just paste, review, click, done)
 ```
 
 ---
@@ -140,8 +141,8 @@ Total hands-on time: ~5–10 min per video (just paste, review, click, pick musi
 | Download video | Manual (JSON2Video site) | One click (Download button on page) | ✓ built |
 | Add logo + intro + outro | Manual (Canva, 20+ min) | Auto (FFmpeg script, ~2 min) | ✓ built |
 | Add music | Manual (Canva, by ear) | Auto (pick from numbered list) | ✓ built |
-| YouTube upload | Manual (Studio, 10+ min) | Auto (YouTube API script) | ◯ planned |
-| Title / description | Manual | Auto-generated | ◯ planned |
+| YouTube upload | Manual (Studio, 10+ min) | Auto (YouTube API script) | ✓ built |
+| Title / description | Manual | Auto-generated | ✓ built |
 
 ---
 
@@ -160,13 +161,13 @@ Total hands-on time: ~5–10 min per video (just paste, review, click, pick musi
 - Download button appears automatically when render completes
 - Fixed JSON2VIDEO_API_KEY loading in `.env`
 
-### Phase 3 — YouTube Auto-Upload ◯ PLANNED
-- Script accepts `output/{name}_final.mp4` + scripture reference as input
-- Authenticates via OAuth2 with YouTube Data API v3
-- Auto-generates title, description, tags from scripture reference + template
-- Uploads to channel, sets category, visibility, and schedule
-- Optionally auto-generates thumbnail (scripture text on dark background)
-- Target: fire-and-forget after post-produce.py finishes
+### Phase 3 — YouTube Auto-Upload ✓ COMPLETE
+- `scripts/upload_youtube.py` — standalone script, mirrors post_produce.py style
+- OAuth2 Desktop flow (browser on first run, token reused after)
+- Auto-generates title (`{Book} {Chapter} | KJV Bible | AI Cinematic`), description, tags
+- Generates thumbnail via Pillow (dark background + gold scripture text, 1280×720)
+- Uploads as **unlisted** — user publishes from YouTube Studio when ready
+- Prints YouTube URL + Studio edit link on completion
 
 ### Phase 4 — Full One-Click Pipeline ◯ FUTURE
 - Single command: `python generate.py "Matthew 8"`
@@ -190,6 +191,7 @@ Total hands-on time: ~5–10 min per video (just paste, review, click, pick musi
 | `workflows/biblical-cinematic/assets/` | 1 | Drop-in folder for logo, intro, outro, music tracks |
 | `workflows/biblical-cinematic/n8n/Biblical-Video-Workflow-v6.0.2.json` | — | n8n workflow (import once, runs forever) |
 | `workflows/biblical-cinematic/templates/JSON2Video-Template-FIXED.json` | — | JSON2Video template (import once) |
+| `workflows/biblical-cinematic/scripts/upload_youtube.py` | 3 | YouTube uploader — OAuth2, thumbnail gen, unlisted upload |
 
 ---
 

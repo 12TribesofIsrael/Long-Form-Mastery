@@ -118,6 +118,7 @@ python app.py
 | [workflows/biblical-cinematic/templates/JSON2Video-Template-FIXED.json](workflows/biblical-cinematic/templates/JSON2Video-Template-FIXED.json) | Import into JSON2Video |
 | [workflows/biblical-cinematic/scripts/post_produce.py](workflows/biblical-cinematic/scripts/post_produce.py) | FFmpeg post-production — concat intro/outro, overlay logo, mix music |
 | [workflows/biblical-cinematic/scripts/batch_post_produce.py](workflows/biblical-cinematic/scripts/batch_post_produce.py) | Batch mode — process all videos in output/raw/ at once |
+| [workflows/biblical-cinematic/scripts/upload_youtube.py](workflows/biblical-cinematic/scripts/upload_youtube.py) | YouTube uploader — OAuth2, auto-generates title/description/thumbnail, uploads as unlisted |
 | [workflows/biblical-cinematic/assets/](workflows/biblical-cinematic/assets/) | Drop-in folder for logo.png, intro.mp4, outro.mp4, music/ |
 
 ### Post-Production (Step 4 in web app — preferred)
@@ -132,6 +133,16 @@ python workflows/biblical-cinematic/scripts/post_produce.py output/raw/video.mp4
 python workflows/biblical-cinematic/scripts/batch_post_produce.py
 ```
 Options: `--width 3840` (for 4K, default 1920)
+
+### YouTube Upload (Phase 3)
+```bash
+python workflows/biblical-cinematic/scripts/upload_youtube.py output/video_final.mp4 "Genesis 1"
+```
+- First run: browser opens for Google OAuth2 → token saved to `scripts/.youtube_token.json`
+- Subsequent runs: no browser needed
+- Uploads as **unlisted** — go to YouTube Studio to review and publish
+- Requires `client_secrets.json` in `workflows/biblical-cinematic/scripts/` (one-time Google Cloud setup)
+- Optional: `--no-thumbnail` to skip thumbnail generation
 
 ---
 

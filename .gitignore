@@ -19,6 +19,10 @@ dist/
 build/
 .pytest_cache/
 
+# YouTube OAuth credentials (never commit these)
+workflows/biblical-cinematic/scripts/client_secrets.json
+workflows/biblical-cinematic/scripts/.youtube_token.json
+
 # OS
 .DS_Store
 Thumbs.db
