@@ -174,14 +174,14 @@ def upload_video(youtube, video_path: Path, book: str, chapter: str) -> str:
 
     request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
 
-    print("  Uploading", end="", flush=True)
+    print("  Uploading... 0%", flush=True)
     response = None
     while response is None:
         status, response = request.next_chunk()
         if status:
             pct = int(status.progress() * 100)
-            print(f"\r  Uploading... {pct}%  ", end="", flush=True)
-    print("\r  Uploading... 100% ✓   ")
+            print(f"  Uploading... {pct}%", flush=True)
+    print("  Uploading... 100% ✓")
     return response["id"]
 
 

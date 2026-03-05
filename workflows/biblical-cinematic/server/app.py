@@ -59,7 +59,19 @@ _BIBLICAL_DIR = _SCRIPT_DIR.parent
 _PROJECT_ROOT = _BIBLICAL_DIR.parent.parent   # c:/Users/Tommy/AI Movie
 RAW_DIR       = _PROJECT_ROOT / "output" / "raw"
 OUT_DIR       = _PROJECT_ROOT / "output"
-POST_SCRIPT   = _BIBLICAL_DIR / "scripts" / "post_produce.py"
+POST_SCRIPT    = _BIBLICAL_DIR / "scripts" / "post_produce.py"
+UPLOAD_SCRIPT  = _BIBLICAL_DIR / "scripts" / "upload_youtube.py"
+
+# ── Upload state (single-user, in-memory) ─────────────────────────────────────
+upload_state: dict = {
+    "status":     "idle",   # idle | running | done | error
+    "progress":   0,        # 0–100
+    "label":      "",
+    "file":       None,
+    "video_url":  None,
+    "studio_url": None,
+    "error":      None,
+}
 
 # ── Render state (single-user, in-memory) ─────────────────────────────────────
 render_state: dict = {
@@ -103,6 +115,11 @@ class GenerateResponse(BaseModel):
 
 class RenderRequest(BaseModel):
     file: str
+
+
+class UploadRequest(BaseModel):
+    file: str
+    scripture: str
 
 
 # ── API Routes ────────────────────────────────────────────────────────────────
@@ -354,6 +371,113 @@ def _run_render(raw_file: Path):
     except Exception as exc:
         render_state["status"] = "error"
         render_state["error"]  = str(exc)
+
+
+# ── YouTube upload background thread ─────────────────────────────────────────
+
+def _run_upload(final_file: Path, scripture: str):
+    """Run upload_youtube.py as a subprocess; parse stdout to drive upload_state."""
+    try:
+        env = os.environ.copy()
+        env["PYTHONUNBUFFERED"] = "1"
+
+        proc = subprocess.Popen(
+            [sys.executable, "-u", str(UPLOAD_SCRIPT), str(final_file), scripture],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            env=env,
+        )
+
+        for line in proc.stdout:
+            line = line.strip()
+            if not line:
+                continue
+            print(f"[upload] {line}", flush=True)
+
+            if "Uploading..." in line:
+                m = re.search(r"(\d+)%", line)
+                if m:
+                    pct = int(m.group(1))
+                    upload_state["progress"] = min(int(pct * 0.88), 88)
+                    upload_state["label"] = f"Uploading to YouTube... {pct}%"
+            elif "Generating thumbnail" in line:
+                upload_state["progress"] = 93
+                upload_state["label"] = "Generating thumbnail..."
+            elif "Thumbnail set" in line:
+                upload_state["progress"] = 99
+                upload_state["label"] = "Finalizing..."
+            elif "youtu.be/" in line:
+                m = re.search(r"https://youtu\.be/\S+", line)
+                if m:
+                    upload_state["video_url"] = m.group(0).rstrip(".")
+            elif "studio.youtube.com" in line:
+                m = re.search(r"https://studio\.youtube\.com/\S+", line)
+                if m:
+                    upload_state["studio_url"] = m.group(0).rstrip(".")
+
+        proc.wait()
+
+        if proc.returncode == 0:
+            upload_state["status"]   = "done"
+            upload_state["progress"] = 100
+            upload_state["label"]    = "Done!"
+        else:
+            upload_state["status"] = "error"
+            upload_state["error"]  = "Upload failed — check the server terminal for details."
+
+    except Exception as exc:
+        upload_state["status"] = "error"
+        upload_state["error"]  = str(exc)
+
+
+# ── YouTube upload API endpoints ──────────────────────────────────────────────
+
+@app.get("/api/upload/check")
+async def upload_check():
+    """Return list of final videos in output/ (not output/raw/)."""
+    if not OUT_DIR.exists():
+        return {"files": [], "count": 0}
+    exts = {".mp4", ".mov", ".mkv"}
+    files = sorted(
+        f.name for f in OUT_DIR.iterdir()
+        if f.is_file() and f.suffix.lower() in exts
+    )
+    return {"files": files, "count": len(files)}
+
+
+@app.post("/api/upload/start")
+async def upload_start(req: UploadRequest):
+    """Validate final file + scripture, then launch upload in a background thread."""
+    if upload_state["status"] == "running":
+        return {"status": "error", "message": "An upload is already in progress."}
+
+    if not req.scripture.strip():
+        return {"status": "error", "message": "Scripture reference is required (e.g. Matthew 10)."}
+
+    safe_name  = Path(req.file).name
+    final_file = OUT_DIR / safe_name
+    if not final_file.exists():
+        return {"status": "error", "message": f"File not found: {safe_name}"}
+
+    upload_state.update({
+        "status":     "running",
+        "progress":   0,
+        "label":      "Starting upload...",
+        "file":       safe_name,
+        "video_url":  None,
+        "studio_url": None,
+        "error":      None,
+    })
+
+    threading.Thread(target=_run_upload, args=(final_file, req.scripture.strip()), daemon=True).start()
+    return {"status": "started"}
+
+
+@app.get("/api/upload/status")
+async def upload_status_ep():
+    """Return current upload_state as JSON."""
+    return upload_state
 
 
 # ── Post-production API endpoints ─────────────────────────────────────────────
@@ -703,6 +827,114 @@ LANDING_PAGE = """<!DOCTYPE html>
               class="block w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 rounded-xl transition-colors text-center">
               ⬇ Download Final Video
             </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Step 5 divider -->
+    <div class="flex items-center gap-4 mt-8 mb-6">
+      <div class="flex-1 h-px bg-gray-800"></div>
+      <span class="text-xs text-gray-600 font-semibold tracking-widest uppercase">YouTube Upload</span>
+      <div class="flex-1 h-px bg-gray-800"></div>
+    </div>
+
+    <!-- ── STEP 5: YouTube Upload ── -->
+    <div id="step5">
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+
+        <!-- Header row -->
+        <div class="flex items-start justify-between mb-5">
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full bg-red-700 text-white font-bold flex items-center justify-center text-xs flex-shrink-0 mt-0.5">5</div>
+            <div>
+              <h3 class="text-base font-semibold text-white">Upload to YouTube</h3>
+              <p class="text-sm text-gray-400 mt-0.5">Upload your final video as an unlisted draft — publish from YouTube Studio when ready.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <div id="final-file-badge" class="text-xs px-3 py-1 rounded-full bg-gray-800 text-gray-500">
+              ○ Checking...
+            </div>
+            <button onclick="checkFinalFiles()" title="Refresh"
+              class="text-xs text-gray-500 hover:text-gray-200 border border-gray-700 hover:border-gray-500 px-2.5 py-1 rounded-lg transition-colors">
+              ↺
+            </button>
+          </div>
+        </div>
+
+        <!-- Helper text (shown when no files) -->
+        <p id="final-hint" class="text-xs text-gray-600 mb-4 hidden">
+          No final videos found in <code class="text-gray-400">output/</code>. Run post-production (Step 4) first.
+        </p>
+
+        <!-- File selector -->
+        <div id="upload-file-selector-wrap" class="mb-4 hidden">
+          <label class="text-xs text-gray-500 mb-1 block">Select final video to upload</label>
+          <select id="upload-file-selector"
+            class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-red-500">
+          </select>
+        </div>
+
+        <!-- Scripture reference input -->
+        <div class="mb-5">
+          <label class="text-xs text-gray-500 mb-1 block">Scripture reference <span class="text-gray-600">(used for title, tags &amp; thumbnail)</span></label>
+          <input
+            id="upload-scripture"
+            type="text"
+            placeholder='e.g. Matthew 10  or  1 Kings 3'
+            class="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+          />
+        </div>
+
+        <!-- Upload button + error -->
+        <div class="flex items-center gap-3 mb-5">
+          <button id="upload-btn" onclick="startUpload()" disabled
+            class="bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded-xl transition-colors duration-200 flex items-center gap-2">
+            <span id="upload-btn-text">▶ Upload to YouTube</span>
+          </button>
+          <span id="upload-error" class="text-red-400 text-sm hidden"></span>
+        </div>
+
+        <!-- Progress section -->
+        <div id="upload-progress-wrap" class="hidden">
+          <div class="flex justify-between text-xs text-gray-500 mb-1">
+            <span id="upload-stage-label">Preparing...</span>
+            <span id="upload-percent">0%</span>
+          </div>
+          <div class="w-full bg-gray-800 rounded-full h-3 overflow-hidden mb-4">
+            <div id="upload-bar"
+              class="h-3 rounded-full transition-all duration-700 ease-linear"
+              style="width:0%; background: linear-gradient(90deg,#b91c1c,#ef4444);">
+            </div>
+          </div>
+          <!-- Stage steps -->
+          <div class="bg-gray-800 rounded-xl p-4 space-y-2.5 text-sm">
+            <div id="ustep-upload" class="flex items-center gap-2 text-gray-400">
+              <span id="uicon-upload" class="text-gray-600">○</span> Uploading video to YouTube
+            </div>
+            <div id="ustep-thumb" class="flex items-center gap-2 text-gray-400">
+              <span id="uicon-thumb" class="text-gray-600">○</span> Generating &amp; setting thumbnail
+            </div>
+          </div>
+        </div>
+
+        <!-- Done panel -->
+        <div id="upload-done-panel" class="hidden mt-4">
+          <div class="bg-red-900/20 border border-red-800 rounded-xl p-5">
+            <p class="text-red-300 font-semibold mb-4">🎉 Uploaded as unlisted draft!</p>
+            <div class="space-y-2.5">
+              <a id="upload-video-link" href="#" target="_blank"
+                class="flex items-center gap-2 text-sm text-white bg-red-700 hover:bg-red-600 font-semibold py-2.5 px-4 rounded-xl transition-colors justify-center">
+                ▶ View on YouTube
+              </a>
+              <a id="upload-studio-link" href="#" target="_blank"
+                class="flex items-center gap-2 text-sm text-gray-300 hover:text-white border border-gray-700 hover:border-gray-500 py-2.5 px-4 rounded-xl transition-colors justify-center">
+                ✏ Edit in YouTube Studio
+              </a>
+            </div>
+            <p class="text-xs text-gray-500 mt-3 text-center">Video is unlisted — go to Studio to publish it publicly.</p>
           </div>
         </div>
 
@@ -1166,6 +1398,176 @@ LANDING_PAGE = """<!DOCTYPE html>
         document.getElementById('render-btn').disabled = false;
       }
     }
+
+    // ── Step 5: YouTube Upload ────────────────────────────────────────────────
+    let uploadPollTimer = null;
+    let finalFiles = [];
+
+    function setUploadStageIcon(id, state) {
+      const icon = document.getElementById('uicon-' + id);
+      const row  = document.getElementById('ustep-' + id);
+      if (state === 'done') {
+        icon.textContent = '✓';
+        icon.className = 'text-green-400';
+        row.className = 'flex items-center gap-2 text-gray-300';
+      } else if (state === 'active') {
+        icon.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px"></span>';
+        row.className = 'flex items-center gap-2 text-white font-medium';
+      } else {
+        icon.textContent = '○';
+        icon.className = 'text-gray-600';
+        row.className = 'flex items-center gap-2 text-gray-400';
+      }
+    }
+
+    async function checkFinalFiles() {
+      const badge = document.getElementById('final-file-badge');
+      badge.textContent = '○ Checking...';
+      badge.className = 'text-xs px-3 py-1 rounded-full bg-gray-800 text-gray-500';
+      try {
+        const res  = await fetch('/api/upload/check');
+        const data = await res.json();
+        finalFiles = data.files || [];
+
+        const btn          = document.getElementById('upload-btn');
+        const selectorWrap = document.getElementById('upload-file-selector-wrap');
+        const selector     = document.getElementById('upload-file-selector');
+        const hint         = document.getElementById('final-hint');
+
+        if (finalFiles.length === 0) {
+          badge.textContent = '○ No final video found';
+          badge.className = 'text-xs px-3 py-1 rounded-full bg-gray-800 text-gray-500';
+          btn.disabled = true;
+          selectorWrap.classList.add('hidden');
+          hint.classList.remove('hidden');
+        } else {
+          badge.textContent = '● ' + finalFiles.length + ' video' + (finalFiles.length > 1 ? 's' : '') + ' ready';
+          badge.className = 'text-xs px-3 py-1 rounded-full bg-green-900/50 text-green-400 border border-green-800';
+          hint.classList.add('hidden');
+          selector.innerHTML = finalFiles.map(f => '<option value="' + f + '">' + f + '</option>').join('');
+          selectorWrap.classList.toggle('hidden', finalFiles.length <= 1);
+
+          // Check if upload already running/done
+          const sres  = await fetch('/api/upload/status');
+          const sdata = await sres.json();
+          if (sdata.status === 'running') {
+            btn.disabled = true;
+            document.getElementById('upload-btn-text').textContent = 'Uploading...';
+            document.getElementById('upload-progress-wrap').classList.remove('hidden');
+            applyUploadStatus(sdata);
+            startUploadPolling();
+          } else if (sdata.status === 'done') {
+            btn.disabled = false;
+            document.getElementById('upload-btn-text').textContent = '▶ Upload Another';
+            document.getElementById('upload-progress-wrap').classList.remove('hidden');
+            applyUploadStatus(sdata);
+          } else {
+            btn.disabled = false;
+          }
+        }
+      } catch(e) {
+        badge.textContent = '⚠ Error';
+        badge.className = 'text-xs px-3 py-1 rounded-full bg-red-900/30 text-red-400';
+      }
+    }
+
+    async function startUpload() {
+      const selector   = document.getElementById('upload-file-selector');
+      const scripture  = document.getElementById('upload-scripture').value.trim();
+      const fileName   = finalFiles.length === 1 ? finalFiles[0] : selector.value;
+
+      if (!scripture) {
+        showError('upload-error', 'Enter a scripture reference (e.g. Matthew 10).');
+        return;
+      }
+      if (!fileName) return;
+
+      const btn = document.getElementById('upload-btn');
+      btn.disabled = true;
+      document.getElementById('upload-btn-text').innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px"></span> Starting...';
+      hideError('upload-error');
+      document.getElementById('upload-done-panel').classList.add('hidden');
+
+      try {
+        const res  = await fetch('/api/upload/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file: fileName, scripture }),
+        });
+        const data = await res.json();
+        if (data.status === 'error') throw new Error(data.message);
+
+        ['upload', 'thumb'].forEach(id => setUploadStageIcon(id, 'pending'));
+        document.getElementById('upload-bar').style.width = '0%';
+        document.getElementById('upload-percent').textContent = '0%';
+        document.getElementById('upload-stage-label').textContent = 'Starting upload...';
+        document.getElementById('upload-progress-wrap').classList.remove('hidden');
+        document.getElementById('upload-btn-text').textContent = 'Uploading...';
+        startUploadPolling();
+      } catch(e) {
+        btn.disabled = false;
+        document.getElementById('upload-btn-text').textContent = '▶ Upload to YouTube';
+        showError('upload-error', e.message);
+      }
+    }
+
+    function startUploadPolling() {
+      stopUploadPolling();
+      pollUploadStatus();
+      uploadPollTimer = setInterval(pollUploadStatus, 2000);
+    }
+
+    function stopUploadPolling() {
+      if (uploadPollTimer) { clearInterval(uploadPollTimer); uploadPollTimer = null; }
+    }
+
+    async function pollUploadStatus() {
+      try {
+        const res  = await fetch('/api/upload/status');
+        const data = await res.json();
+        applyUploadStatus(data);
+      } catch(_) {}
+    }
+
+    function applyUploadStatus(data) {
+      const pct   = data.progress || 0;
+      const label = data.label || '';
+      document.getElementById('upload-bar').style.width = pct + '%';
+      document.getElementById('upload-percent').textContent = pct + '%';
+      if (label) document.getElementById('upload-stage-label').textContent = label;
+
+      if (pct < 89) {
+        setUploadStageIcon('upload', pct > 0 ? 'active' : 'pending');
+        setUploadStageIcon('thumb', 'pending');
+      } else if (pct < 100) {
+        setUploadStageIcon('upload', 'done');
+        setUploadStageIcon('thumb', 'active');
+      } else {
+        setUploadStageIcon('upload', 'done');
+        setUploadStageIcon('thumb', 'done');
+      }
+
+      if (data.status === 'done') {
+        stopUploadPolling();
+        document.getElementById('upload-done-panel').classList.remove('hidden');
+        document.getElementById('upload-btn-text').textContent = '▶ Upload Another';
+        document.getElementById('upload-btn').disabled = false;
+        if (data.video_url) {
+          document.getElementById('upload-video-link').href = data.video_url;
+        }
+        if (data.studio_url) {
+          document.getElementById('upload-studio-link').href = data.studio_url;
+        }
+      } else if (data.status === 'error') {
+        stopUploadPolling();
+        document.getElementById('upload-stage-label').textContent = '⚠ ' + (data.error || 'Upload failed.');
+        document.getElementById('upload-btn-text').textContent = '▶ Try Again';
+        document.getElementById('upload-btn').disabled = false;
+      }
+    }
+
+    // Auto-check files on page load
+    window.addEventListener('load', () => { checkRawFiles(); checkFinalFiles(); });
 
   </script>
 </body>

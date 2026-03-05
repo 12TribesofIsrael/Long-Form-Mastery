@@ -23,6 +23,13 @@ build/
 workflows/biblical-cinematic/scripts/client_secrets.json
 workflows/biblical-cinematic/scripts/.youtube_token.json
 
+# Video/audio assets (large files — keep locally, not in git)
+*.mp4
+*.mov
+*.mkv
+*.mp3
+*.wav
+
 # OS
 .DS_Store
 Thumbs.db

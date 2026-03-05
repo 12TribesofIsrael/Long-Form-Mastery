@@ -111,7 +111,7 @@ python app.py
 | File | Purpose |
 |---|---|
 | [workflows/biblical-cinematic/README.md](workflows/biblical-cinematic/README.md) | Complete setup guide |
-| [workflows/biblical-cinematic/server/app.py](workflows/biblical-cinematic/server/app.py) | FastAPI server — `/api/clean`, `/api/generate`, `/api/status`, `/api/render/*` (Step 4 post-production) |
+| [workflows/biblical-cinematic/server/app.py](workflows/biblical-cinematic/server/app.py) | FastAPI server — `/api/clean`, `/api/generate`, `/api/status`, `/api/render/*` (Step 4), `/api/upload/*` (Step 5 YouTube) |
 | [workflows/biblical-cinematic/server/requirements.txt](workflows/biblical-cinematic/server/requirements.txt) | Server dependencies |
 | [workflows/biblical-cinematic/text_processor/biblical_text_processor_v2.py](workflows/biblical-cinematic/text_processor/biblical_text_processor_v2.py) | KJV text cleaner/splitter (imported by server) |
 | [workflows/biblical-cinematic/n8n/Biblical-Video-Workflow-v6.0.2.json](workflows/biblical-cinematic/n8n/Biblical-Video-Workflow-v6.0.2.json) | Import into n8n |
@@ -134,7 +134,10 @@ python workflows/biblical-cinematic/scripts/batch_post_produce.py
 ```
 Options: `--width 3840` (for 4K, default 1920)
 
-### YouTube Upload (Phase 3)
+### YouTube Upload (Step 5 in web app — preferred)
+Select a final video from the **Step 5** panel at http://localhost:8000, enter the scripture reference (e.g. "Genesis 1"), click **Upload to YouTube**. Progress bar tracks upload + thumbnail. Done panel shows YouTube URL + Studio edit link.
+
+**CLI fallback (terminal):**
 ```bash
 python workflows/biblical-cinematic/scripts/upload_youtube.py output/video_final.mp4 "Genesis 1"
 ```
